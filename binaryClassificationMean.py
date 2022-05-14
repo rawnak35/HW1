@@ -1,17 +1,13 @@
 import numpy as np
 import pandas as pd
-
 import pickle
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 from sklearn.metrics import f1_score
-
-
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import confusion_matrix, classification_report
+
 
 
 #Read Data
@@ -22,11 +18,6 @@ train_df =train_df.fillna(0)
 test_df = pd.read_csv("full_df_mean_test.psv", delimiter='|')
 
 test_df = test_df.fillna(0)
-"""
-features = ['HR', 'O2Sat', 'Temp', 'SBP', 'DBP', 'Resp', 'BaseExcess', 'FiO2', 'pH',
-              'SaO2', 'AST', 'Alkalinephos', 'Calcium', 'Chloride', 'Creatinine', 'Glucose', 'Magnesium',
-              'Phosphate', 'Potassium', 'Bilirubin_total', 'Hgb', 'PTT', 'WBC', 'Platelets', 'Age',
-              'HospAdmTime', 'ICULOS', 'Gender', 'Unit1', 'Unit2',"BUN"]"""
 
 features = ['HR', 'O2Sat', 'Temp', 'SBP', 'Resp', 'pH', 'SaO2', 'Calcium', 'Chloride',
             'Creatinine', 'Magnesium', 'Phosphate', 'Potassium', 'Hgb', 'PTT', 'WBC', 'ICULOS', 'Gender', 'Unit1', 'Unit2']
@@ -44,6 +35,8 @@ y_test = test_df[target]
 #Standardize Input
 scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
+with open("scaler.pkl", 'wb') as f:
+    pickle.dump(scaler, f)
 X_test = scaler.transform(X_test)
 
 
@@ -107,6 +100,10 @@ class BinaryClassification(nn.Module):
 
 
 def train():
+    """
+    train the NN model
+    :return: None
+    """
     train_data = TrainData(torch.FloatTensor(X_train),torch.FloatTensor(y_train.values))
     test_data = TrainData(torch.FloatTensor(X_test), torch.FloatTensor(y_test.values))
     train_loader = DataLoader(dataset=train_data, batch_size=BATCH_SIZE, shuffle=True)
@@ -197,6 +194,11 @@ def train():
 
 
 def predict(model_path):
+    """
+    load the model and predict, and save results
+    :param model_path: the NN model
+    :return: None
+    """
     model = BinaryClassification()
 
     model.load_state_dict(torch.load(model_path))
