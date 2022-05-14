@@ -11,7 +11,7 @@ import torch
 
 directory = sys.argv[1]
 path_out = "test.csv"
-model_path = 'model.pt' #TODO
+model_path = 'model.pt'
 
 i = 0
 for filename in os.listdir(directory):
@@ -53,12 +53,14 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 test_data = binaryClassificationMean.TestData(torch.FloatTensor(X_test))
 test_loader = binaryClassificationMean.DataLoader(dataset=test_data, batch_size=1, shuffle=False)
 
+# load the model
 model = binaryClassificationMean.BinaryClassification()
 
 model.load_state_dict(torch.load(model_path))
 model.eval()
 y_pred_list = []
 
+# predictions
 with torch.no_grad():
     for X_batch in test_loader:
         X_batch = X_batch.to(device)
